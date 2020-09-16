@@ -35,6 +35,7 @@ private:
   SmallVector<const Instruction *, 12> TermOps;
   SmallVector<const Instruction *, 12> UnaryOps;
   SmallVector<const Instruction *, 12> BinaryOps;
+  SmallVector<const Instruction *, 12> FloatBinaryOps;
   SmallVector<const Instruction *, 12> BitwiseBinaryOps;
   SmallVector<const Instruction *, 12> VectorOps;
   SmallVector<const Instruction *, 12> AggregateOps;
@@ -63,6 +64,7 @@ void InstructionClassification::print(raw_ostream &OS, const Module *) const {
   size_t NumTermOps = this->TermOps.size();
   size_t NumUnaryOps = this->UnaryOps.size();
   size_t NumBinaryOps = this->BinaryOps.size();
+  size_t NumFloatBinaryOps = this->FloatBinaryOps.size();
   size_t NumBitwiseBinaryOps = this->BitwiseBinaryOps.size();
   size_t NumVectorOps = this->VectorOps.size();
   size_t NumAggregateOps = this->AggregateOps.size();
@@ -73,6 +75,7 @@ void InstructionClassification::print(raw_ostream &OS, const Module *) const {
   OS << "  # terminator operations: " << NumTermOps << '\n';
   OS << "  # unary operations: " << NumUnaryOps << '\n';
   OS << "  # binary operations: " << NumBinaryOps << '\n';
+  OS << "  # float binary operations: " << NumFloatBinaryOps << '\n';
   OS << "  # bitwise binary operations: " << NumBitwiseBinaryOps << '\n';
   OS << "  # vector operations: " << NumVectorOps << '\n';
   OS << "  # aggregate operations: " << NumAggregateOps << '\n';
@@ -104,18 +107,20 @@ bool InstructionClassification::runOnFunction(Function &F) {
       this->UnaryOps.push_back(&*I);
       break;
     case Instruction::Add:
-    case Instruction::FAdd:
     case Instruction::Sub:
-    case Instruction::FSub:
     case Instruction::Mul:
-    case Instruction::FMul:
     case Instruction::UDiv:
     case Instruction::SDiv:
-    case Instruction::FDiv:
     case Instruction::URem:
     case Instruction::SRem:
-    case Instruction::FRem:
       this->BinaryOps.push_back(&*I);
+      break;
+    case Instruction::FAdd:
+    case Instruction::FSub:
+    case Instruction::FMul:
+    case Instruction::FRem:
+    case Instruction::FDiv:
+      this->FloatBinaryOps.push_back(&*I);
       break;
     case Instruction::Shl:
     case Instruction::LShr:
